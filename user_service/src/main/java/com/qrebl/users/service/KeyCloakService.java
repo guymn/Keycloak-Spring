@@ -6,7 +6,6 @@ import com.qrebl.users.KeycloakConfig;
 import lombok.AllArgsConstructor;
 
 import org.keycloak.admin.client.resource.RealmResource;
-import org.keycloak.admin.client.resource.RoleResource;
 import org.keycloak.admin.client.resource.RolesResource;
 import org.keycloak.admin.client.resource.UserResource;
 import org.keycloak.admin.client.resource.UsersResource;
@@ -15,15 +14,14 @@ import org.keycloak.representations.idm.RoleRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.stereotype.Service;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-
-import javax.ws.rs.core.Response;
 
 @AllArgsConstructor
 @Service
 public class KeyCloakService {
+
+    private static final String REALM = "myrealm";
 
     public String createUser(UserDTO userDTO) {
         CredentialRepresentation credential = Credentials
@@ -36,21 +34,19 @@ public class KeyCloakService {
         user.setCredentials(Collections.singletonList(credential));
         user.setEnabled(true);
 
-        UsersResource usersResource = getUserInstance("myrealm");
+        UsersResource usersResource = getUserInstance(REALM);
         usersResource.create(user);
         return "Create USer Successfully.";
     }
 
     public UserResource getUserByUserId(String userId) {
-        UsersResource usersResource = getUserInstance("myrealm");
-        UserResource user = usersResource.get(userId);
-        return user;
+        UsersResource usersResource = getUserInstance(REALM);
+        return usersResource.get(userId);
     }
 
     public List<UserRepresentation> getUser(String userName) {
-        UsersResource usersResource = getUserInstance("myrealm");
-        List<UserRepresentation> user = usersResource.search(userName, true);
-        return user;
+        UsersResource usersResource = getUserInstance(REALM);
+        return usersResource.search(userName, true);
 
     }
 
@@ -64,18 +60,18 @@ public class KeyCloakService {
         user.setEmail(userDTO.getEmail());
         user.setCredentials(Collections.singletonList(credential));
 
-        UsersResource usersResource = getUserInstance("myrealm");
+        UsersResource usersResource = getUserInstance(REALM);
         usersResource.get(userId).update(user);
     }
 
     public void deleteUser(String userId) {
-        UsersResource usersResource = getUserInstance("myrealm");
+        UsersResource usersResource = getUserInstance(REALM);
         usersResource.get(userId)
                 .remove();
     }
 
     public void setVerificationEmail(String userId, Boolean verificationStatus) {
-        UsersResource usersResource = getUserInstance("myrealm");
+        UsersResource usersResource = getUserInstance(REALM);
         UserResource userResource = usersResource.get(userId);
 
         UserRepresentation userRepresentation = userResource.toRepresentation();
@@ -85,7 +81,7 @@ public class KeyCloakService {
     }
 
     public void setUserEnabled(String userId, Boolean enableStatus) {
-        UsersResource usersResource = getUserInstance("myrealm");
+        UsersResource usersResource = getUserInstance(REALM);
         UserResource userResource = usersResource.get(userId);
 
         UserRepresentation userRepresentation = userResource.toRepresentation();
@@ -103,7 +99,7 @@ public class KeyCloakService {
     }
 
     public void addRoleToUser(String username, String rolename) {
-        RealmResource realmResource = getRealmInstance("myrealm");
+        RealmResource realmResource = getRealmInstance(REALM);
         UsersResource usersResource = realmResource.users();
         // Retrieve the user
         UserRepresentation user = usersResource.search(username).get(0);
@@ -116,7 +112,7 @@ public class KeyCloakService {
     }
 
     public void createRole(String rolename) {
-        RealmResource realmResource = getRealmInstance("myrealm");
+        RealmResource realmResource = getRealmInstance(REALM);
         RolesResource roleResource = realmResource.roles();
 
         RoleRepresentation role = new RoleRepresentation();
@@ -126,7 +122,7 @@ public class KeyCloakService {
     }
 
     public void resetPassword(String userId, String password) {
-        UsersResource usersResource = getUserInstance("myrealm");
+        UsersResource usersResource = getUserInstance(REALM);
 
         UserResource userResource = usersResource.get(userId);
 
